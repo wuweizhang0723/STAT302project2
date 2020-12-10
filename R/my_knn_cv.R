@@ -33,8 +33,8 @@ my_knn_cv <- function(train, cl, k_nn, k_cv) {
   mis_rate <- rep(NA, k_cv)
   # Loop through the number of fold and compute the misclassification rate.
   for (i in 1:k_cv) {
-    data_train <- train %>% filter(fold != i) %>% select(-fold)
-    data_test <- train %>% filter(fold == i) %>% select(-fold)
+    data_train <- train %>% dplyr::filter(fold != i) %>% select(-fold)
+    data_test <- train %>% dplyr::filter(fold == i) %>% select(-fold)
     cl_train <- cl[fold != i]
     cl_test <- cl[fold == i]
     # Predict the class of a certain fold using all other folds as the

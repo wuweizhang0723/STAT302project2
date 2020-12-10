@@ -13,9 +13,9 @@ my_rf_cv(k)
 A numeric output representing the cross-validation error.
 }
 \description{
-This function predicts the output body mass by bill length, bill depth,
-and flipper length, and computes the cross-validation error using
-\code{penguins} data.
+This function predicts penguins body mass by bill length, bill depth,
+and flipper length by using random forest models, and computes
+the cross-validation error.
 }
 \examples{
 my_rf_cv(5)
