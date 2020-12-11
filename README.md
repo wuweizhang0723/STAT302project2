@@ -5,7 +5,7 @@
 
 ## Use
 
-The vignette demonstrates example usage of all main functions.
+The vignette demonstrates example usage of all functions.
 In order to install the vignettes with the package from Github, use the following code:
 
 ``` r
