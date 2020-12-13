@@ -15,6 +15,39 @@ knitr::opts_chunk$set(
 )
 ```
 
-```{r setup}
+```{r setup, include = FALSE}
 library(STAT302project2)
+data("my_gapminder")
 ```
+
+## Introduction
+
+STAT302project2 package contains four functions that are able to 
+
+* perform one sample t-test, 
+* fit a linear model, 
+* predict output class using k-nearest neighbors cross-validation, 
+* predict output class using random forest cross-validation.
+
+In this tutorial, I will explain how to use these functions with `my_penguins` data and `my_gapminder` data.
+
+Install STAT302project2 package using:
+```{r, eval = FALSE}
+devtools::install_github("wuweizhang0723/STAT302project2")
+```
+
+## Tutorial for `my_t.test`
+
+Use the `lifeExp` data from `my_gapminder`.
+Demonstrate a test of the hypothesis
+  \begin{align}
+  H_0: \mu &= 60,\\
+  H_a: \mu &\neq 60.
+  \end{align}
+```{r}
+my_t.test(my_gapminder$lifeExp, "two.sided", 60)
+```
+
+
+
+
