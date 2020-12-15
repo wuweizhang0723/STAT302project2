@@ -8,7 +8,7 @@ Authors@R:
            email = "wz86@uw.edu")
 Description: This package is for STAT302 Project2.
 License: GPL-3
-Imports: stats, dplyr, magrittr, randomForest, class, tidyr, tidyverse, tibble
+Imports: stats, dplyr, magrittr, randomForest, class, tidyr, tidyverse, tibble, stringr, ggplot2
 Encoding: UTF-8
 LazyData: true
 Roxygen: list(markdown = TRUE)

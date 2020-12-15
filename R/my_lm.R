@@ -8,6 +8,8 @@
 #' @return A table with columns for Estimate, Std. Error, t value, Pr(>|t|),
 #'   and rows for each coefficient.
 #'
+#' @import ggplot2
+#'
 #' @examples
 #' my_lm(mpg ~ hp*wt, mtcars)
 #' my_lm(mpg ~ wt, mtcars)

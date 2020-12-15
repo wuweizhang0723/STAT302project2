@@ -18,6 +18,7 @@ knitr::opts_chunk$set(
 ```{r setup, include = FALSE}
 library(STAT302project2)
 data("my_gapminder")
+data("my_penguins")
 ```
 
 ## Introduction
@@ -33,20 +34,162 @@ In this tutorial, I will explain how to use these functions with `my_penguins` d
 
 Install STAT302project2 package using:
 ```{r, eval = FALSE}
-devtools::install_github("wuweizhang0723/STAT302project2")
+# devtools::install_github("wuweizhang0723/STAT302project2")
 ```
 
 ## Tutorial for `my_t.test`
 
-Use the `lifeExp` data from `my_gapminder`.
-Demonstrate a test of the hypothesis
+Let's use the `lifeExp` data from `my_gapminder`.
+
+1. Consider a test of the hypothesis
   \begin{align}
   H_0: \mu &= 60,\\
   H_a: \mu &\neq 60.
   \end{align}
+
+The null hypothesis is that the mean value of life expectancy is equal to 60. Our alternative hypothesis is that the mean value of life expectancy is not equal to 60.
+
+Use `my_t.test` function:
 ```{r}
-my_t.test(my_gapminder$lifeExp, "two.sided", 60)
+result_1 <- my_t.test(my_gapminder$lifeExp, "two.sided", 60)
+result_1
 ```
+
+Now, we can see that `my_t.test` returns a list of results. 
+
+* The test statistic of this hypothesis testing is `r result_1$test_stat`.
+* The degrees of freedom is `r result_1$df`.
+* Our alternative hypothesis is `r result_1$alternative`.
+* And we get p-value = `r result_1$p_val`.
+
+The p-value is larger than the significance level $\alpha = 0.05$, so we have insufficient evidence to reject the null hypothesis.
+
+2. Consider a test of the hypothesis
+  \begin{align}
+  H_0: \mu &= 60,\\
+  H_a: \mu &< 60.
+  \end{align}
+  
+The null hypothesis is that the mean value of life expectancy is equal to 60. Now, our alternative hypothesis is that the mean value of life expectancy is less than 60.
+
+Use `my_t.test` function:
+```{r}
+result_2 <- my_t.test(my_gapminder$lifeExp, "less", 60)
+result_2
+```
+
+For this hypothesis testing, the p-value = `r result_2$p_val` is less than the significance level $\alpha = 0.05$. Therefore, we have sufficient evidence to reject the null hypothesis and conclude that the true mean life expectancy is less than 60.
+
+3. Consider a test of the hypothesis
+  \begin{align}
+  H_0: \mu &= 60,\\
+  H_a: \mu &> 60.
+  \end{align}
+  
+The null hypothesis is that the mean value of life expectancy is equal to 60. Now, our alternative hypothesis is that the mean value of life expectancy is greater than 60.
+
+Use `my_t.test` function:
+```{r}
+result_3 <- my_t.test(my_gapminder$lifeExp, "greater", 60)
+result_3
+```
+
+For this hypothesis testing, the p-value = `r result_3$p_val` is greater than the significance level $\alpha = 0.05$. Therefore, we have insufficient evidence to reject the null hypothesis.
+
+
+## Tutorial for `my_lm`
+
+Let's use the `lifeExp` data from `my_gapminder`.
+
+We are using `lifeExp` as response variable and `gdpPercap` and `continent` as explanatory variables.
+
+Use `my_lm` function to fit a linear model.
+```{r}
+my_model <- my_lm(lifeExp ~ gdpPercap + continent, my_gapminder)
+my_model
+my_coef <- as.data.frame.matrix(my_model)$Estimate
+my_p <- as.data.frame.matrix(my_model)[, 4]
+```
+
+Now, we can see that `my_lm` returns a coefficient table. 
+
+Let's consider `gdpPercap` coefficient. From the table, we can know that the coefficient of variable `gdpPercap` in our model is equal to `r my_coef[2]`. Therefore, `gdpPercap` coefficient $=$ `r my_coef[2]` is the expected difference in the response between two observations differing by one unit in `gdpPercap`, with all other covariates identical.
+
+Also, note that `Pr(>|t|)` value of `gdpPercap` coefficient comes from the two-sided t test.
+$$
+\begin{align}
+H_0: \beta_{gdp} &= 0\\
+H_a: \beta_{gdp} &\neq 0
+\end{align}
+$$
+
+`Pr(>|t|)` for gdpPercap hypothesis test is equal to `r my_p[2]`, which is less than the significance level $\alpha = 0.05$. Therefore, we have sufficient evidence to reject the null hypothesis and conclude that `gdpPercap` coefficient is not equal to 0.
+
+
+Now, let's plot the Actual vs. Fitted values and compare them to assess our model fit.
+```{r fig, fig.height = 3.75, fig.width = 6, fig.align = "center"}
+my_matrix <- model.matrix(lifeExp ~ gdpPercap + continent, data = my_gapminder)
+# Compute fitted values.
+y_hat <- my_matrix %*% as.matrix(my_coef)
+my_df <- data.frame("actual" = my_gapminder$lifeExp, "fitted" = y_hat,
+                    "continent" = my_gapminder$continent)
+# Plot the Actual vs. Fitted values
+library(ggplot2)
+ggplot(my_df, aes(x = fitted, y = actual, color = continent)) +
+  geom_point(size = 1) +
+  geom_abline(slope = 1, intercept = 0, col = "red", lty = 2) + 
+  theme_bw(base_size = 15) +
+  labs(x = "Fitted values", y = "Actual values", title = "Actual vs. Fitted") +
+  theme(plot.title = element_text(hjust = 0.5))
+```
+
+
+## Tutorial for `my_knn_cv`
+
+Let's use the `my_penguins` data.
+
+Let's use `my_knn_cv` function to predict output class `species` using `bill_length_mm`, `bill_depth_mm`, `flipper_length_mm`, and `body_mass_g` with  5-fold cross validation.
+
+We will perform 5-fold cross validation and predict the output class with 1-nearest neighbor through 10-nearest neighbors, respectively. Let's store training misclassification rate and the CV misclassification rate for each of these 10 models.
+```{r}
+# Clean penguins data.
+data <- tidyr::drop_na(my_penguins) %>%
+  dplyr::select(-island, -sex, -year)
+train <- data %>% dplyr::select(-species)
+species <- data$species
+# Store training error and CV error.
+training_error <- rep(NA, 10)
+CV_error <- rep(NA, 10)
+for (i in 1:10) {
+  training_error[i] <- mean(my_knn_cv(train, species, i, 5)$class 
+                            != data$species)
+  CV_error[i] <- my_knn_cv(train, species, i, 5)$cv_error
+}
+```
+
+Now, let's make a table to see the results.
+```{r}
+my_table <- cbind(CV_error, training_error)
+colnames(my_table) <- c("CV error", "training error")
+rownames(my_table) <- stringr::str_c("knn = ", 1:10)
+as.table(my_table)
+```
+
+From the table, we can see that 1-nearest neighbor has both the lowest CV error and lowest training set error. So we would choose 1-nearest neighbors cross-validation based on the training misclassification rates and the CV misclassification rates.
+
+Note that Cross-validation is a method to evaluate our models! In this tutorial, we use 5-fold Cross-validation.
+Inside the function, `my_penguins` data is Spitted into 5 folds. Then we use all but 1 fold as training data and fit the model, and use the remaining fold for test data and make predictions. For each split, we calculate the out-of-sample test error. Then we calculate the cross-validation estimate of our test error.
+
+Therefore, the values of CV errors would help us to assess our models from `knn = 1` through `knn = 10`.
+We can see that 1-nearest neighbor has the lowest CV_error. 
+Therefore, we would choose 1-nearest neighbor in practice.
+
+
+## Tutorial for `my_rf_cv`
+
+Let's use the `my_penguins` data.
+
+Let's use `my_rf_cv` function to predict `body_mass_g` using `bill_length_mm`, `bill_depth_mm`, and `flipper_length_mm` with 2-fold cross validation, 5-fold cross validation, and 10-fold cross validation, respectively.
 
 
 
