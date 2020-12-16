@@ -4,6 +4,7 @@
 #'
 #' @param formula A formula input that describes the model to be fitted.
 #' @param data A data frame input containing the variables in the model.
+#' @keywords inference prediction
 #'
 #' @return A table with columns for Estimate, Std. Error, t value, Pr(>|t|),
 #'   and rows for each coefficient.

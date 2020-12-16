@@ -25,3 +25,4 @@ my_t.test(c(1,2,5,7), "two.sided", 0)
 my_t.test(c(0,1,2,5,7,-2), "greater", 2)
 
 }
+\keyword{inference}

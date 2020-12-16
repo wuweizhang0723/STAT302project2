@@ -15,7 +15,7 @@ knitr::opts_chunk$set(
 )
 ```
 
-```{r setup, include = FALSE}
+```{r setup, warning = FALSE}
 library(STAT302project2)
 data("my_gapminder")
 data("my_penguins")
@@ -49,7 +49,7 @@ Let's use the `lifeExp` data from `my_gapminder`.
 
 The null hypothesis is that the mean value of life expectancy is equal to 60. Our alternative hypothesis is that the mean value of life expectancy is not equal to 60.
 
-Use `my_t.test` function:
+Use `my_t.test` function to perform one sample t-test:
 ```{r}
 result_1 <- my_t.test(my_gapminder$lifeExp, "two.sided", 60)
 result_1
@@ -72,7 +72,7 @@ The p-value is larger than the significance level $\alpha = 0.05$, so we have in
   
 The null hypothesis is that the mean value of life expectancy is equal to 60. Now, our alternative hypothesis is that the mean value of life expectancy is less than 60.
 
-Use `my_t.test` function:
+Use `my_t.test` function to perform one sample t-test:
 ```{r}
 result_2 <- my_t.test(my_gapminder$lifeExp, "less", 60)
 result_2
@@ -88,7 +88,7 @@ For this hypothesis testing, the p-value = `r result_2$p_val` is less than the s
   
 The null hypothesis is that the mean value of life expectancy is equal to 60. Now, our alternative hypothesis is that the mean value of life expectancy is greater than 60.
 
-Use `my_t.test` function:
+Use `my_t.test` function to perform one sample t-test:
 ```{r}
 result_3 <- my_t.test(my_gapminder$lifeExp, "greater", 60)
 result_3
@@ -103,7 +103,7 @@ Let's use the `lifeExp` data from `my_gapminder`.
 
 We are using `lifeExp` as response variable and `gdpPercap` and `continent` as explanatory variables.
 
-Use `my_lm` function to fit a linear model.
+Use `my_lm` function to fit a linear model:
 ```{r}
 my_model <- my_lm(lifeExp ~ gdpPercap + continent, my_gapminder)
 my_model
@@ -127,7 +127,7 @@ $$
 
 
 Now, let's plot the Actual vs. Fitted values and compare them to assess our model fit.
-```{r fig, fig.height = 3.75, fig.width = 6, fig.align = "center"}
+```{r fig, fig.height = 3.75, fig.width = 6, fig.align = "center", warning=FALSE}
 my_matrix <- model.matrix(lifeExp ~ gdpPercap + continent, data = my_gapminder)
 # Compute fitted values.
 y_hat <- my_matrix %*% as.matrix(my_coef)
@@ -175,10 +175,10 @@ rownames(my_table) <- stringr::str_c("knn = ", 1:10)
 as.table(my_table)
 ```
 
-From the table, we can see that 1-nearest neighbor has both the lowest CV error and lowest training set error. So we would choose 1-nearest neighbors cross-validation based on the training misclassification rates and the CV misclassification rates.
+From the table, we can see that 1-nearest neighbor has both the lowest CV error and lowest training set error. So we would choose 1-nearest neighbor model based on the training misclassification rates and the CV misclassification rates.
 
-Note that Cross-validation is a method to evaluate our models! In this tutorial, we use 5-fold Cross-validation.
-Inside the function, `my_penguins` data is Spitted into 5 folds. Then we use all but 1 fold as training data and fit the model, and use the remaining fold for test data and make predictions. For each split, we calculate the out-of-sample test error. Then we calculate the cross-validation estimate of our test error.
+Note that cross-validation is a method to evaluate our models! In this tutorial, we use 5-fold Cross-validation.
+For each model, `my_penguins` data is Spitted into 5 folds. Then we use all but 1 fold as training data and fit the model, and use the remaining fold for test data and make predictions. For each split, we calculate the out-of-sample test error. Then we calculate the cross-validation estimate of our test error.
 
 Therefore, the values of CV errors would help us to assess our models from `knn = 1` through `knn = 10`.
 We can see that 1-nearest neighbor has the lowest CV_error. 
@@ -190,6 +190,37 @@ Therefore, we would choose 1-nearest neighbor in practice.
 Let's use the `my_penguins` data.
 
 Let's use `my_rf_cv` function to predict `body_mass_g` using `bill_length_mm`, `bill_depth_mm`, and `flipper_length_mm` with 2-fold cross validation, 5-fold cross validation, and 10-fold cross validation, respectively.
+
+```{r}
+k_2 <- rep(NA, 30)
+k_5 <- rep(NA, 30)
+k_10 <- rep(NA, 30)
+for (i in 1:30) {
+  k_2[i] <- my_rf_cv(2)
+  k_5[i] <- my_rf_cv(5)
+  k_10[i] <- my_rf_cv(10)
+}
+my_data <- data.frame("CV_error" = append(append(k_2, k_5), k_10),
+                      "k" = as.factor(rep(c(2, 5, 10), each = 30)))
+```
+
+```{r fig2, fig.height = 3, fig.width = 5, fig.align = "center"}
+ggplot(data = my_data, aes(x = k, y = CV_error)) +
+  geom_boxplot(fill = "lightblue") +
+  theme_bw(base_size = 15) +
+  labs(title = "CV Error by k-fold Cross-validation", 
+       x = "k-fold Cross-validation", 
+       y = "CV Error") +
+  theme(plot.title = element_text(hjust = 0.5))
+```
+
+```{r}
+my_table <- cbind(c(mean(k_2), mean(k_5), mean(k_10)),
+                  c(sd(k_2), sd(k_5), sd(k_10)))
+colnames(my_table) <- c("mean", "standard deviation")
+rownames(my_table) <- c("k = 2", "k = 5", "k = 10")
+as.table(my_table)
+```
 
 
 

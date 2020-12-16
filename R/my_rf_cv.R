@@ -5,6 +5,7 @@
 #'   the cross-validation error.
 #'
 #' @param k A numeric input representing the number of folds.
+#' @keywords prediction
 #'
 #' @return A numeric output representing the cross-validation error.
 #'

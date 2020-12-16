@@ -7,6 +7,7 @@
 #' @param cl True class values of the training data.
 #' @param k_nn A numeric input representing the number of neighbors.
 #' @param k_cv A numeric input representing the number of folds.
+#' @keywords prediction
 #'
 #' @return A list of predicted class for all observations and CV error.
 #'

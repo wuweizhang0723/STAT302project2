@@ -32,3 +32,4 @@ my_knn_cv(train, species, 5, 5)
 }
 
 }
+\keyword{prediction}

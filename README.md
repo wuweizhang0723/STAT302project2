@@ -3,6 +3,16 @@
 [![Codecov test coverage](https://codecov.io/gh/wuweizhang0723/STAT302project2/branch/master/graph/badge.svg)](https://codecov.io/gh/wuweizhang0723/STAT302project2?branch=master)
 <!-- badges: end -->
 
+## Installation
+
+To download the STAT302project2 package, use the code below.
+
+``` r
+# install.packages("devtools")
+devtools::install_github("wuweizhang0723/STAT302project2")
+library(STAT302project2)
+```
+
 ## Use
 
 The vignette demonstrates example usage of all functions.

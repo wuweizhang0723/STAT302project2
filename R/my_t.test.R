@@ -5,6 +5,7 @@
 #' @param x A numeric vector of data.
 #' @param alternative A character string specifying the alternative hypothesis.
 #' @param mu A numeric input indicating the null hypothesis value of the mean.
+#' @keywords inference
 #'
 #' @return A list with elements: the test statistic, the degrees of freedom,
 #'   the value of \code{alternative}, and the numeric p-value.
