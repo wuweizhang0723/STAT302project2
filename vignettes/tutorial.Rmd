@@ -15,12 +15,6 @@ knitr::opts_chunk$set(
 )
 ```
 
-```{r setup, warning = FALSE}
-library(STAT302project2)
-data("my_gapminder")
-data("my_penguins")
-```
-
 ## Introduction
 
 STAT302project2 package contains four functions that are able to 
@@ -35,6 +29,14 @@ In this tutorial, I will explain how to use these functions with `my_penguins` d
 Install STAT302project2 package using:
 ```{r, eval = FALSE}
 # devtools::install_github("wuweizhang0723/STAT302project2")
+```
+
+To begin, we load our package and example data.
+```{r setup, warning = FALSE}
+# Load Package and data.
+library(STAT302project2)
+data("my_gapminder")
+data("my_penguins")
 ```
 
 ## Tutorial for `my_t.test`
@@ -107,13 +109,16 @@ Use `my_lm` function to fit a linear model:
 ```{r}
 my_model <- my_lm(lifeExp ~ gdpPercap + continent, my_gapminder)
 my_model
+# Store the estimates of coefficients.
 my_coef <- as.data.frame.matrix(my_model)$Estimate
+# Store the p-values.
 my_p <- as.data.frame.matrix(my_model)[, 4]
 ```
 
 Now, we can see that `my_lm` returns a coefficient table. 
 
-Let's consider `gdpPercap` coefficient. From the table, we can know that the coefficient of variable `gdpPercap` in our model is equal to `r my_coef[2]`. Therefore, `gdpPercap` coefficient $=$ `r my_coef[2]` is the expected difference in the response between two observations differing by one unit in `gdpPercap`, with all other covariates identical.
+Let's consider `gdpPercap` coefficient. From the table, we can know that the coefficient of variable `gdpPercap` in our model is equal to `r my_coef[2]`. 
+We can interpret `gdpPercap` coefficient $=$ `r my_coef[2]` as the expected difference in the response between two observations differing by one unit in `gdpPercap`, with all other covariates identical.
 
 Also, note that `Pr(>|t|)` value of `gdpPercap` coefficient comes from the two-sided t test.
 $$
@@ -143,14 +148,18 @@ ggplot(my_df, aes(x = fitted, y = actual, color = continent)) +
   theme(plot.title = element_text(hjust = 0.5))
 ```
 
+* We can see that the trends for Africa, Asia, and Americas are nearly vertical, which means that our model predicts the similar values of life expectancy for the countries within the same continent. 
+* Also, our model predicts that Africa overall has the shortest life expectancy while Europe and Oceania have the longest life expectancy. 
+* Since the data for Africa, Asia, and Americas are not distributed along the line of $y=x$, we can conclude that the linear models with `lifeExp` as response variable and `gdpPercap` as explanatory variable are not very good for interpreting the data of Africa, Asia, and Americas. 
+* However, since the data for Europe and Oceania are overall distributed along the line of $y=x$, we can conclude that the linear models with `lifeExp` as response variable and `gdpPercap` as explanatory variable fit relatively well for these continents.
 
 ## Tutorial for `my_knn_cv`
 
 Let's use the `my_penguins` data.
 
-Let's use `my_knn_cv` function to predict output class `species` using `bill_length_mm`, `bill_depth_mm`, `flipper_length_mm`, and `body_mass_g` with  5-fold cross validation.
+Let's use `my_knn_cv` function to predict output class `species` using `bill_length_mm`, `bill_depth_mm`, `flipper_length_mm`, and `body_mass_g` with  5-fold cross-validation.
 
-We will perform 5-fold cross validation and predict the output class with 1-nearest neighbor through 10-nearest neighbors, respectively. Let's store training misclassification rate and the CV misclassification rate for each of these 10 models.
+We will perform 5-fold cross-validation and predict the output class with 1-nearest neighbor through 10-nearest neighbors, respectively. Let's store training misclassification rate and the CV misclassification rate for each of these 10 models.
 ```{r}
 # Clean penguins data.
 data <- tidyr::drop_na(my_penguins) %>%
@@ -178,10 +187,10 @@ as.table(my_table)
 From the table, we can see that 1-nearest neighbor has both the lowest CV error and lowest training set error. So we would choose 1-nearest neighbor model based on the training misclassification rates and the CV misclassification rates.
 
 Note that cross-validation is a method to evaluate our models! In this tutorial, we use 5-fold Cross-validation.
-For each model, `my_penguins` data is Spitted into 5 folds. Then we use all but 1 fold as training data and fit the model, and use the remaining fold for test data and make predictions. For each split, we calculate the out-of-sample test error. Then we calculate the cross-validation estimate of our test error.
+For each model, `my_penguins` data is Split into 5 folds. Then we use all but 1 fold as training data and fit the model, and use the remaining fold for test data and make predictions. For each split, we calculate the out-of-sample test error. Then we calculate the cross-validation estimate of our test error.
 
 Therefore, the values of CV errors would help us to assess our models from `knn = 1` through `knn = 10`.
-We can see that 1-nearest neighbor has the lowest CV_error. 
+We can see that 1-nearest neighbor has the lowest CV error. 
 Therefore, we would choose 1-nearest neighbor in practice.
 
 
@@ -189,22 +198,29 @@ Therefore, we would choose 1-nearest neighbor in practice.
 
 Let's use the `my_penguins` data.
 
-Let's use `my_rf_cv` function to predict `body_mass_g` using `bill_length_mm`, `bill_depth_mm`, and `flipper_length_mm` with 2-fold cross validation, 5-fold cross validation, and 10-fold cross validation, respectively.
+Let's use `my_rf_cv` function to predict `body_mass_g` using `bill_length_mm`, `bill_depth_mm`, and `flipper_length_mm` with 2-fold cross-validation, 5-fold cross-validation, and 10-fold cross-validation, respectively.
+
+We want to compute CV errors 30 times for each value of $k$, and store the results.
 
 ```{r}
 k_2 <- rep(NA, 30)
 k_5 <- rep(NA, 30)
 k_10 <- rep(NA, 30)
+# For each k, run the function 30 times to generate 30 CV errors.
 for (i in 1:30) {
   k_2[i] <- my_rf_cv(2)
   k_5[i] <- my_rf_cv(5)
   k_10[i] <- my_rf_cv(10)
 }
+# Store all results in a data frame.
 my_data <- data.frame("CV_error" = append(append(k_2, k_5), k_10),
                       "k" = as.factor(rep(c(2, 5, 10), each = 30)))
 ```
 
+Now, we will make 3 boxplots to display these data in an informative way. Each boxplot is associated with each value of $k$, representing 30 simulations.
+
 ```{r fig2, fig.height = 3, fig.width = 5, fig.align = "center"}
+# Make 3 boxplots.
 ggplot(data = my_data, aes(x = k, y = CV_error)) +
   geom_boxplot(fill = "lightblue") +
   theme_bw(base_size = 15) +
@@ -214,14 +230,20 @@ ggplot(data = my_data, aes(x = k, y = CV_error)) +
   theme(plot.title = element_text(hjust = 0.5))
 ```
 
+Let's use a table to display the average CV estimate and the standard deviation of the CV estimates across $k$
+
 ```{r}
+# Make a table to show mean and sd of CV estimates.
+library(kableExtra)
 my_table <- cbind(c(mean(k_2), mean(k_5), mean(k_10)),
                   c(sd(k_2), sd(k_5), sd(k_10)))
 colnames(my_table) <- c("mean", "standard deviation")
 rownames(my_table) <- c("k = 2", "k = 5", "k = 10")
-as.table(my_table)
+kable_styling(kable(my_table))
 ```
 
-
-
+* From the plot, We can see that 2-fold cross-validation has both largest median and largest IQR of CV error, and 5-fold cross-validation and 10-fold cross-validation have close values of median and IQR. 
+* From the table, we can see that 2-fold cross-validation has both largest mean and largest standard deviation of CV error, and 5-fold cross-validation and 10-fold cross-validation have close values of mean. 10-fold cross-validation has the lowest standard deviation of the CV errors. 
+* Altogether, 2-fold cross-validation generates the largest CV error and has the most variability. 5-fold cross-validation and 10-fold cross-validation generate close values of CV errors and have relatively less variability.
+* This result seems reasonable. Due to bias-variance tradeoff, using less data to fit the model would increase bias, so with only 2 folds, the test error would increase. Therefore, using `k = 5` or `k = 10` tend to result in an ideal balance in terms of the bias-variance tradeoff.
 
